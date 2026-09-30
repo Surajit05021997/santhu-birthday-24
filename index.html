@@ -749,7 +749,7 @@
                 </p>
 
                 <!-- Bow & Arrow Interactive Area -->
-                <div id="bow-container" class="relative w-24 h-20 md:w-28 md:h-24 flex items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none" onmousedown="startDrag(event)" ontouchstart="startDrag(event)">
+                <div id="bow-container" class="relative w-32 h-20 md:w-36 md:h-24 flex items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none" onmousedown="startDrag(event)" ontouchstart="startDrag(event)">
                     
                     <!-- Flying Arrow Animation Element -->
                     <div id="flying-arrow" class="absolute hidden flex flex-col items-center pointer-events-none z-50 transition-none" style="width: 28px; height: 78px; flex-shrink: 0;">
@@ -774,12 +774,12 @@
                                     <stop offset="100%" stop-color="#92400e"/>
                                 </linearGradient>
                             </defs>
-                            <path class="bow-glow" d="M28 10 Q91 60 28 110" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="10" stroke-linecap="round"/>
-                            <path d="M28 10 Q88 60 28 110" fill="none" stroke="url(#bowWood)" stroke-width="8" stroke-linecap="round"/>
-                            <path d="M34 20 Q75 60 34 100" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2.5" stroke-linecap="round"/>
-                            <path id="bow-string" d="M29 11 L29 109" fill="none" stroke="rgba(255,255,255,.78)" stroke-width="2"/>
-                            <rect x="25" y="48" width="10" height="24" rx="5" fill="url(#gripGrad)" opacity=".95"/>
-                            <circle cx="29" cy="60" r="3" fill="#fff7ed" opacity=".9"/>
+                            <path class="bow-glow" d="M10 90 Q60 18 110 90" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="10" stroke-linecap="round"/>
+                            <path d="M10 90 Q60 22 110 90" fill="none" stroke="url(#bowWood)" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M20 82 Q60 30 100 82" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2.5" stroke-linecap="round"/>
+                            <path id="bow-string" d="M10 90 L110 90" fill="none" stroke="rgba(255,255,255,.78)" stroke-width="2"/>
+                            <rect x="55" y="78" width="10" height="24" rx="5" fill="url(#gripGrad)" opacity=".95"/>
+                            <circle cx="60" cy="90" r="3" fill="#fff7ed" opacity=".9"/>
                         </svg>
 
                         <!-- Ready Arrow Nocked in Bow -->
@@ -1002,22 +1002,27 @@
         function updateBowDraw(distance) {
             // Pull the arrow back and physically bend the string around the nock.
             nockedArrow.style.transform = `translateY(${distance}px)`;
-            const y = 60 + distance * 0.82;
-            bowString.setAttribute('d', `M29 11 Q ${29 + distance * 0.05} ${y} 29 109`);
+            const y = 90 + distance * 0.9;
+            bowString.setAttribute('d', `M10 90 Q 60 ${y} 110 90`);
             bowContainer.style.setProperty('--draw-strength', `${distance / maxPull}`);
         }
 
         function resetBowString(animated = true) {
             if (animated) {
                 nockedArrow.style.transition = 'transform 420ms cubic-bezier(.16,1.25,.35,1), opacity 180ms ease';
-                bowString.style.transition = 'd 420ms cubic-bezier(.16,1.25,.35,1)';
+                bowString.style.transition = 'none';
+            } else {
+                nockedArrow.style.transition = 'opacity 180ms ease';
+                bowString.style.transition = 'none';
             }
+
             nockedArrow.style.transform = 'translateY(0px)';
-            bowString.setAttribute('d', 'M29 11 L29 109');
+            bowString.setAttribute('d', 'M10 90 L110 90');
+
             setTimeout(() => {
                 nockedArrow.style.transition = '';
                 bowString.style.transition = '';
-            }, 430);
+            }, animated ? 430 : 20);
         }
 
         function startDrag(e) {
@@ -1117,7 +1122,11 @@
             hasShot = true;
 
             nockedArrow.style.opacity = '0';
-            resetBowString(true);
+
+            // Reset the horizontal string instantly when the shot starts.
+            // This prevents SVG path interpolation from making the string
+            // visibly jump upward during the arrow flight.
+            resetBowString(false);
 
             flyingArrow.classList.remove('hidden');
             flyingArrow.style.position = 'absolute';
