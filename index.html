@@ -173,46 +173,179 @@
             50% { transform: translateX(-8px); }
         }
 
-        /* Realistic Balloon Styles */
+        /* Enhanced Balloon + Bow/Arrow Animation Styles */
         .realistic-balloon {
-            width: 32px;
-            height: 40px;
-            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            width: 34px;
+            height: 43px;
+            border-radius: 52% 48% 50% 50% / 42% 42% 58% 58%;
             position: relative;
-            box-shadow: inset -5px -5px 12px rgba(0, 0, 0, 0.25), 0 6px 12px rgba(0, 0, 0, 0.2);
-            animation: floatBalloon 3s ease-in-out infinite;
+            overflow: visible;
+            transform-origin: 50% 58%;
+            box-shadow:
+                inset -7px -8px 14px rgba(0,0,0,0.24),
+                inset 5px 5px 8px rgba(255,255,255,0.18),
+                0 8px 18px rgba(0,0,0,0.22);
+            animation: floatBalloon 3.2s ease-in-out infinite;
+            will-change: transform, opacity;
         }
         @media (min-width: 768px) {
             .realistic-balloon {
-                width: 38px;
-                height: 48px;
+                width: 42px;
+                height: 53px;
             }
         }
         .realistic-balloon::after {
             content: "";
             position: absolute;
-            bottom: -5px;
+            bottom: -6px;
             left: calc(50% - 3px);
             width: 6px;
-            height: 6px;
+            height: 7px;
             background: inherit;
             clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            filter: brightness(0.9);
         }
         .balloon-highlight {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            width: 7px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
+            top: 7px;
+            left: 7px;
+            width: 8px;
+            height: 14px;
+            background: rgba(255,255,255,0.72);
+            border-radius: 60% 40% 60% 40%;
             transform: rotate(-25deg);
+            filter: blur(.15px);
+        }
+        .balloon-string {
+            height: 12px;
+            width: 1px;
+            background: linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,.15));
         }
 
-        @keyframes floatBalloon {
-            0%, 100% { transform: translateY(0) rotate(-2deg); }
-            50% { transform: translateY(-6px) rotate(2deg); }
+        #balloon-pop-layer {
+            position: absolute;
+            inset: -55px;
+            pointer-events: none;
+            z-index: 80;
+            overflow: visible;
         }
+        .pop-spark {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 5px;
+            height: 5px;
+            border-radius: 999px;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(.2);
+            animation: balloonSpark 650ms cubic-bezier(.18,.78,.25,1) forwards;
+            box-shadow: 0 0 9px currentColor;
+        }
+        .pop-shard {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 4px;
+            height: 14px;
+            border-radius: 999px;
+            opacity: 0;
+            transform-origin: 50% 100%;
+            animation: balloonShard 720ms cubic-bezier(.15,.8,.25,1) forwards;
+            box-shadow: 0 0 8px currentColor;
+        }
+        .balloon-popping {
+            animation: balloonHit 180ms ease-out forwards !important;
+        }
+        @keyframes balloonHit {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            45% { transform: scale(1.18) rotate(-3deg); opacity: 1; }
+            100% { transform: scale(.05) rotate(8deg); opacity: 0; }
+        }
+        @keyframes balloonSpark {
+            0% { opacity: 1; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(3px) scale(.35); }
+            100% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateX(var(--distance)) scale(.7); }
+        }
+        @keyframes balloonShard {
+            0% { opacity: 1; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(0) scale(.8); }
+            100% { opacity: 0; transform: translate(-50%,-50%) rotate(var(--angle)) translateY(var(--distance)) scale(.35); }
+        }
+        .arrow-trail {
+            position: absolute;
+            width: 6px;
+            height: 48px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            border-radius: 999px;
+            background: linear-gradient(to bottom, rgba(253,224,71,0), rgba(251,191,36,.55), rgba(244,63,94,0));
+            filter: blur(2px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .arrow-shake {
+            animation: targetShake 260ms cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes targetShake {
+            10%, 90% { transform: translateX(-2px); }
+            20%, 80% { transform: translateX(4px); }
+            30%, 50%, 70% { transform: translateX(-7px); }
+            40%, 60% { transform: translateX(7px); }
+        }
+
+        /* Enhanced Bow */
+        #bow-graphic {
+            filter: drop-shadow(0 7px 8px rgba(0,0,0,.25));
+            overflow: visible;
+        }
+        #bow-string {
+            transition: d 60ms linear;
+        }
+        .bow-glow {
+            animation: bowGlow 2s ease-in-out infinite;
+        }
+        @keyframes bowGlow {
+            0%,100% { opacity: .55; }
+            50% { opacity: .95; }
+        }
+        .nocked-arrow {
+            transition: transform 90ms ease-out, opacity 180ms ease;
+            transform-origin: 50% 50%;
+        }
+        .arrow-shaft {
+            position: relative;
+            width: 4px;
+            height: 39px;
+            border-radius: 999px;
+            background: linear-gradient(to right, #92400e 0%, #fde68a 38%, #f59e0b 60%, #78350f 100%);
+            box-shadow: 0 0 7px rgba(251,191,36,.75);
+        }
+        .arrow-head {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 15px solid #fef3c7;
+            filter: drop-shadow(0 0 5px rgba(252,211,77,.9));
+            margin-bottom: -1px;
+        }
+        .arrow-fletching {
+            position: relative;
+            width: 17px;
+            height: 10px;
+            margin-top: -3px;
+        }
+        .arrow-fletching::before,
+        .arrow-fletching::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            width: 11px;
+            height: 7px;
+            background: linear-gradient(135deg, #fb7185, #f9a8d4);
+            clip-path: polygon(0 100%, 100% 0, 78% 100%);
+        }
+        .arrow-fletching::before { left: 0; transform: scaleX(-1); }
+        .arrow-fletching::after { right: 0; }
 
         /* Letter View & Smooth Envelope Styles */
         #letter-view {
@@ -479,24 +612,25 @@
         <div class="glass-card rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-10 text-center relative overflow-hidden">
             
             <!-- Target Balloons Cluster at the Top -->
-            <div id="target-balloons" class="flex items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4 transition-all duration-300">
+            <div id="target-balloons" class="relative flex items-center justify-center gap-2 md:gap-5 mb-3 md:mb-4 transition-all duration-300">
+                <div id="balloon-pop-layer"></div>
                 <div class="flex flex-col items-center">
-                    <div class="realistic-balloon bg-gradient-to-tr from-pink-500 to-rose-400 balloon-float" style="animation-delay: 0s;">
+                    <div class="realistic-balloon bg-gradient-to-tr from-pink-500 to-rose-400" style="animation-delay: 0s;">
                         <div class="balloon-highlight"></div>
                     </div>
-                    <div class="w-[1px] h-2.5 md:h-3 bg-white/40"></div>
+                    <div class="balloon-string"></div>
                 </div>
-                <div class="flex flex-col items-center -translate-y-2">
-                    <div class="realistic-balloon bg-gradient-to-tr from-purple-500 to-pink-400 balloon-float" style="animation-delay: 0.5s;">
+                <div class="flex flex-col items-center -translate-y-3">
+                    <div class="realistic-balloon bg-gradient-to-tr from-purple-500 to-pink-400" style="animation-delay: .45s;">
                         <div class="balloon-highlight"></div>
                     </div>
-                    <div class="w-[1px] h-2.5 md:h-3 bg-white/40"></div>
+                    <div class="balloon-string"></div>
                 </div>
                 <div class="flex flex-col items-center">
-                    <div class="realistic-balloon bg-gradient-to-tr from-rose-500 to-amber-400 balloon-float" style="animation-delay: 1s;">
+                    <div class="realistic-balloon bg-gradient-to-tr from-rose-500 to-amber-400" style="animation-delay: .9s;">
                         <div class="balloon-highlight"></div>
                     </div>
-                    <div class="w-[1px] h-2.5 md:h-3 bg-white/40"></div>
+                    <div class="balloon-string"></div>
                 </div>
             </div>
             <span class="text-[9px] md:text-[10px] tracking-wider uppercase text-pink-100 font-medium bg-white/10 px-3 py-0.5 rounded-full border border-white/20 inline-block mb-2 md:mb-3">Shoot the balloons to open! 🎯</span>
@@ -541,33 +675,43 @@
                 <div id="bow-container" class="relative w-24 h-20 md:w-28 md:h-24 flex items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none" onmousedown="startDrag(event)" ontouchstart="startDrag(event)">
                     
                     <!-- Flying Arrow Animation Element -->
-                    <div id="flying-arrow" class="absolute hidden flex flex-col items-center pointer-events-none z-50 transition-none" style="width: 24px; height: 72px; flex-shrink: 0;">
-                        <i class="fa-solid fa-chevron-up text-amber-300 text-xl md:text-2xl drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]" style="flex-shrink: 0; line-height: 1;"></i>
-                        <div class="bg-gradient-to-t from-amber-500 via-yellow-200 to-amber-300 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.8)]" style="width: 5px; height: 42px; flex-shrink: 0;"></div>
-                        <i class="fa-solid fa-heart text-rose-500 text-xs md:text-sm drop-shadow" style="flex-shrink: 0; margin-top: -2px; line-height: 1;"></i>
+                    <div id="flying-arrow" class="absolute hidden flex flex-col items-center pointer-events-none z-50 transition-none" style="width: 28px; height: 78px; flex-shrink: 0;">
+                        <div class="arrow-trail"></div>
+                        <div class="arrow-head"></div>
+                        <div class="arrow-shaft"></div>
+                        <div class="arrow-fletching"></div>
                     </div>
 
-                    <!-- Bow Graphic -->
-                    <div class="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
-                        <svg class="absolute inset-0 w-full h-full drop-shadow-md" viewBox="0 0 100 100">
-                            <path d="M 20 10 Q 80 50 20 90" fill="none" stroke="url(#bowGrad)" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Enhanced Bow Graphic -->
+                    <div class="relative w-20 h-20 md:w-24 md:h-24 flex items-center justify-center">
+                        <svg id="bow-graphic" class="absolute inset-0 w-full h-full" viewBox="0 0 120 120" aria-hidden="true">
                             <defs>
-                                <linearGradient id="bowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#f472b6" />
-                                    <stop offset="100%" stop-color="#9333ea" />
+                                <linearGradient id="bowWood" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f9a8d4"/>
+                                    <stop offset="42%" stop-color="#ec4899"/>
+                                    <stop offset="100%" stop-color="#7e22ce"/>
+                                </linearGradient>
+                                <linearGradient id="gripGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#fef3c7"/>
+                                    <stop offset="50%" stop-color="#f59e0b"/>
+                                    <stop offset="100%" stop-color="#92400e"/>
                                 </linearGradient>
                             </defs>
-                            <line id="bow-string" x1="22" y1="15" x2="22" y2="85" stroke="rgba(255,255,255,0.6)" stroke-width="2" />
+                            <path class="bow-glow" d="M28 10 Q91 60 28 110" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="10" stroke-linecap="round"/>
+                            <path d="M28 10 Q88 60 28 110" fill="none" stroke="url(#bowWood)" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M34 20 Q75 60 34 100" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2.5" stroke-linecap="round"/>
+                            <path id="bow-string" d="M29 11 L29 109" fill="none" stroke="rgba(255,255,255,.78)" stroke-width="2"/>
+                            <rect x="25" y="48" width="10" height="24" rx="5" fill="url(#gripGrad)" opacity=".95"/>
+                            <circle cx="29" cy="60" r="3" fill="#fff7ed" opacity=".9"/>
                         </svg>
 
                         <!-- Ready Arrow Nocked in Bow -->
-                        <div id="nocked-arrow" class="absolute flex flex-col items-center pointer-events-none" style="transform: translateY(0px); width: 24px; height: 60px; flex-shrink: 0;">
-                            <i class="fa-solid fa-chevron-up text-amber-300 text-base md:text-lg drop-shadow-[0_0_6px_rgba(252,211,77,0.8)]" style="flex-shrink: 0; line-height: 1;"></i>
-                            <div class="bg-gradient-to-t from-amber-500 via-yellow-200 to-amber-300 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" style="width: 5px; height: 35px; flex-shrink: 0;"></div>
-                            <i class="fa-solid fa-heart text-rose-500 text-[10px] md:text-xs drop-shadow" style="flex-shrink: 0; margin-top: -2px; line-height: 1;"></i>
+                        <div id="nocked-arrow" class="nocked-arrow absolute flex flex-col items-center pointer-events-none" style="transform: translateY(0px); width: 28px; height: 70px;">
+                            <div class="arrow-head"></div>
+                            <div class="arrow-shaft"></div>
+                            <div class="arrow-fletching"></div>
                         </div>
                     </div>
-                </div>
 
                 <!-- Warning Message Toast -->
                 <div id="warning-toast" class="absolute -bottom-3 md:-bottom-4 bg-black/70 backdrop-blur-md text-pink-200 px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-medium border border-white/20 opacity-0 transition-all duration-300 pointer-events-none shadow-lg z-50 whitespace-nowrap">
@@ -759,40 +903,69 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
 
-        // --- BOW & ARROW DRAG & SHOOT MECHANIC ---
+        // --- ENHANCED BOW & ARROW + BALLOON POP MECHANIC ---
         let isDragging = false;
         let startY = 0;
         let pullDistance = 0;
-        const maxPull = 45;
+        let hasShot = false;
+        const maxPull = 58;
 
+        const bowContainer = document.getElementById('bow-container');
         const nockedArrow = document.getElementById('nocked-arrow');
         const flyingArrow = document.getElementById('flying-arrow');
         const warningToast = document.getElementById('warning-toast');
         const targetBalloons = document.getElementById('target-balloons');
+        const bowString = document.getElementById('bow-string');
+        const popLayer = document.getElementById('balloon-pop-layer');
+
+        function getPointerY(e) {
+            return e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        }
+
+        function updateBowDraw(distance) {
+            // Pull the arrow back and physically bend the string around the nock.
+            nockedArrow.style.transform = `translateY(${distance}px)`;
+            const y = 60 + distance * 0.82;
+            bowString.setAttribute('d', `M29 11 Q ${29 + distance * 0.05} ${y} 29 109`);
+            bowContainer.style.setProperty('--draw-strength', `${distance / maxPull}`);
+        }
+
+        function resetBowString(animated = true) {
+            if (animated) {
+                nockedArrow.style.transition = 'transform 420ms cubic-bezier(.16,1.25,.35,1), opacity 180ms ease';
+                bowString.style.transition = 'd 420ms cubic-bezier(.16,1.25,.35,1)';
+            }
+            nockedArrow.style.transform = 'translateY(0px)';
+            bowString.setAttribute('d', 'M29 11 L29 109');
+            setTimeout(() => {
+                nockedArrow.style.transition = '';
+                bowString.style.transition = '';
+            }, 430);
+        }
 
         function startDrag(e) {
+            if (hasShot) return;
+            e.preventDefault?.();
             isDragging = true;
-            startY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
-            
+            startY = getPointerY(e);
+            bowContainer.classList.add('active:cursor-grabbing');
+
             window.addEventListener('mousemove', onDrag);
-            window.addEventListener('touchmove', onDrag);
+            window.addEventListener('touchmove', onDrag, { passive: false });
             window.addEventListener('mouseup', endDrag);
             window.addEventListener('touchend', endDrag);
         }
 
         function onDrag(e) {
-            if (!isDragging) return;
-            const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
-            let diff = currentY - startY;
-            
-            if (diff < 0) diff = 0;
-            if (diff > maxPull) diff = maxPull;
-            
+            if (!isDragging || hasShot) return;
+            e.preventDefault?.();
+
+            const diff = Math.max(0, Math.min(maxPull, getPointerY(e) - startY));
             pullDistance = diff;
-            nockedArrow.style.transform = `translateY(${pullDistance}px)`;
+            updateBowDraw(diff);
         }
 
-        function endDrag(e) {
+        function endDrag() {
             if (!isDragging) return;
             isDragging = false;
 
@@ -801,72 +974,121 @@
             window.removeEventListener('mouseup', endDrag);
             window.removeEventListener('touchend', endDrag);
 
-            if (pullDistance > 15) {
+            if (pullDistance > 14) {
                 shootArrow();
             } else {
-                nockedArrow.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                nockedArrow.style.transform = 'translateY(0px)';
-                setTimeout(() => { nockedArrow.style.transition = ''; }, 250);
+                resetBowString(true);
             }
             pullDistance = 0;
         }
 
+        function spawnBalloonBurst(balloon) {
+            const rect = balloon.getBoundingClientRect();
+            const parentRect = popLayer.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2 - parentRect.left;
+            const cy = rect.top + rect.height / 2 - parentRect.top;
+
+            const colors = ['#f9a8d4', '#fb7185', '#fbbf24', '#c4b5fd', '#ffffff'];
+            const sparks = 14;
+
+            for (let i = 0; i < sparks; i++) {
+                const dot = document.createElement('span');
+                dot.className = i % 3 === 0 ? 'pop-shard' : 'pop-spark';
+                dot.style.left = `${cx}px`;
+                dot.style.top = `${cy}px`;
+                dot.style.color = colors[i % colors.length];
+                dot.style.background = colors[i % colors.length];
+                dot.style.setProperty('--angle', `${(360 / sparks) * i + (Math.random() * 16 - 8)}deg`);
+                dot.style.setProperty('--distance', `${38 + Math.random() * 45}px`);
+                dot.style.animationDelay = `${Math.random() * 45}ms`;
+                popLayer.appendChild(dot);
+                setTimeout(() => dot.remove(), 850);
+            }
+        }
+
+        function popBalloons() {
+            const balloons = [...targetBalloons.querySelectorAll('.realistic-balloon')];
+            targetBalloons.classList.add('arrow-shake');
+
+            balloons.forEach((balloon, index) => {
+                setTimeout(() => {
+                    spawnBalloonBurst(balloon);
+                    balloon.classList.add('balloon-popping');
+
+                    const wrapper = balloon.parentElement;
+                    if (wrapper) {
+                        wrapper.querySelector('.balloon-string')?.animate(
+                            [
+                                { opacity: 1, transform: 'translateY(0)' },
+                                { opacity: 0, transform: 'translateY(14px) rotate(10deg)' }
+                            ],
+                            { duration: 430, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' }
+                        );
+                    }
+                }, index * 95);
+            });
+
+            setTimeout(() => {
+                targetBalloons.style.transition = 'opacity 500ms ease, transform 650ms cubic-bezier(.16,1,.3,1)';
+                targetBalloons.style.opacity = '0';
+                targetBalloons.style.transform = 'translateY(-18px) scale(.92)';
+            }, 310);
+        }
+
         function shootArrow() {
+            if (hasShot) return;
+            hasShot = true;
+
             nockedArrow.style.opacity = '0';
-            nockedArrow.style.transform = 'translateY(0px)';
+            resetBowString(true);
 
             flyingArrow.classList.remove('hidden');
-            flyingArrow.style.transition = 'none';
             flyingArrow.style.position = 'absolute';
-            flyingArrow.style.bottom = '15px';
             flyingArrow.style.left = '50%';
-            flyingArrow.style.transform = 'translateX(-50%) scale(1)';
+            flyingArrow.style.bottom = '8px';
             flyingArrow.style.opacity = '1';
+            flyingArrow.style.transform = 'translateX(-50%) translateY(0) rotate(0deg) scale(1)';
+            flyingArrow.style.transition = 'none';
 
             void flyingArrow.offsetWidth;
 
-            // Test override enabled for testing
-            const isCountdownOver = true; 
+            // The arrow accelerates first, then eases into the target like a real shot.
+            flyingArrow.style.transition = 'transform 620ms cubic-bezier(.08,.82,.18,1), opacity 120ms ease';
+            flyingArrow.style.transform = 'translateX(-50%) translateY(-308px) rotate(-2deg) scale(1.04)';
 
-            if (isCountdownOver) {
-                flyingArrow.style.transition = 'all 0.35s cubic-bezier(0.1, 0.8, 0.3, 1)';
-                flyingArrow.style.transform = 'translateX(-50%) translateY(-310px) scale(1)';
+            const trail = flyingArrow.querySelector('.arrow-trail');
+            if (trail) {
+                trail.animate(
+                    [
+                        { opacity: 0, transform: 'translate(-50%,-50%) scaleY(.4)' },
+                        { opacity: .9, transform: 'translate(-50%,-50%) scaleY(1)' },
+                        { opacity: 0, transform: 'translate(-50%,-50%) scaleY(1.6)' }
+                    ],
+                    { duration: 560, easing: 'ease-out', fill: 'forwards' }
+                );
+            }
+
+            setTimeout(() => {
+                // Tiny impact pause sells the hit before the balloons burst.
+                flyingArrow.style.transition = 'transform 90ms ease-out, opacity 160ms ease';
+                flyingArrow.style.transform = 'translateX(-50%) translateY(-308px) rotate(-2deg) scale(1.12)';
+
+                playBirthdayMusic();
+                confetti({ particleCount: 55, spread: 55, startVelocity: 35, origin: { y: 0.2 } });
 
                 setTimeout(() => {
-                    // Balloon pops — start the music at this exact moment.
-                    playBirthdayMusic();
+                    popBalloons();
+                    confetti({ particleCount: 150, spread: 105, startVelocity: 42, origin: { y: 0.18 } });
 
-                    targetBalloons.style.transition = 'all 0.2s ease';
-                    targetBalloons.style.transform = 'scale(1.3) translateY(-10px)';
-                    targetBalloons.style.opacity = '0';
-
-                    confetti({ particleCount: 120, spread: 90, origin: { y: 0.2 } });
+                    setTimeout(() => {
+                        flyingArrow.style.opacity = '0';
+                    }, 160);
 
                     setTimeout(() => {
                         showCelebration();
-                    }, 500);
-                }, 350);
-            } else {
-                flyingArrow.style.transition = 'all 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
-                flyingArrow.style.transform = 'translateX(-50%) translateY(-110px) scale(1)';
-
-                setTimeout(() => {
-                    flyingArrow.style.transition = 'all 0.3s ease-in';
-                    flyingArrow.style.transform = 'translateX(-50%) translateY(20px) scale(1)';
-                    flyingArrow.style.opacity = '0';
-
-                    warningToast.style.opacity = '1';
-                    warningToast.style.transform = 'translateY(-5px)';
-
-                    setTimeout(() => {
-                        warningToast.style.opacity = '0';
-                        warningToast.style.transform = 'translateY(0px)';
-                        nockedArrow.style.opacity = '1';
-                        flyingArrow.classList.add('hidden');
-                        flyingArrow.style.opacity = '0';
-                    }, 2200);
-                }, 300);
-            }
+                    }, 900);
+                }, 90);
+            }, 620);
         }
 
         // --- VIEWS NAVIGATION LOGIC ---
