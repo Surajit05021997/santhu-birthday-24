@@ -225,6 +225,29 @@
         }
 
         /* Enhanced Balloon + Bow/Arrow Animation Styles */
+        /* Gentle floating motion for the complete balloon + string, with staggered timing. */
+        #target-balloons > div {
+            --balloon-base-y: 0px;
+            animation: balloonFloatWrapper 3.6s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        #target-balloons > div:nth-child(2) {
+            --balloon-base-y: -8px;
+            animation-duration: 4.1s;
+            animation-delay: -1.1s;
+        }
+
+        #target-balloons > div:nth-child(3) {
+            animation-duration: 3.9s;
+            animation-delay: -2s;
+        }
+
+        @keyframes balloonFloatWrapper {
+            0%, 100% { transform: translateY(var(--balloon-base-y)) rotate(-1.5deg); }
+            50% { transform: translateY(calc(var(--balloon-base-y) - 10px)) rotate(1.5deg); }
+        }
+
         .realistic-balloon {
             width: 34px;
             height: 43px;
@@ -236,7 +259,6 @@
                 inset -7px -8px 14px rgba(0,0,0,0.24),
                 inset 5px 5px 8px rgba(255,255,255,0.18),
                 0 8px 18px rgba(0,0,0,0.22);
-            animation: floatBalloon 3.2s ease-in-out infinite;
             will-change: transform, opacity;
         }
         @media (min-width: 768px) {
@@ -945,8 +967,8 @@
                     <h3 class="title-font text-2xl md:text-4xl text-pink-500 mb-2 md:mb-3 text-center border-b border-pink-100 pb-2 md:pb-3">My Dearest Santhu,</h3>
                     <div class="font-light text-gray-700 text-xs md:text-base leading-relaxed overflow-y-auto pr-2 custom-scrollbar flex-grow">
                         <p class="mb-2 md:mb-3 mt-1">Happy Birthday! 🎂</p>
-                        <p class="mb-2 md:mb-3">Life is just so better with you around. I look back at everything we've done together and smile, and I'm so excited for everything still ahead of us.</p>
-                        <p class="mb-2 md:mb-3">So glad you came into my life.</p>
+                        <p class="mb-2 md:mb-3">You make every single day brighter just by being in it. I cherish all these beautiful memories we've made, and I can't wait to create a million more together.</p>
+                        <p class="mb-2 md:mb-3">May your day be as sweet, gorgeous, and absolutely perfect as you are.</p>
                         <p class="text-right text-pink-500 font-medium mt-4 md:mt-6 title-font text-xl md:text-2xl">Forever Yours, <br>❤️</p>
                     </div>
                 </div>
