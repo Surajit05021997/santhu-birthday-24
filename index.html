@@ -1065,6 +1065,20 @@
             }, animated ? 430 : 20);
         }
 
+        function showBirthdayWarning() {
+            if (!warningToast) return;
+
+            warningToast.textContent = "✨ It's not your birthday yet, my love!";
+            warningToast.style.opacity = '1';
+            warningToast.style.transform = 'translateY(-4px) scale(1.02)';
+
+            clearTimeout(window.__birthdayWarningTimer);
+            window.__birthdayWarningTimer = setTimeout(() => {
+                warningToast.style.opacity = '0';
+                warningToast.style.transform = 'translateY(0) scale(1)';
+            }, 1800);
+        }
+
         function startDrag(e) {
             if (hasShot) return;
             e.preventDefault?.();
@@ -1159,6 +1173,63 @@
 
         function shootArrow() {
             if (hasShot) return;
+
+            // The balloons can only be reached on the birthday itself.
+            // Before the countdown reaches zero, the arrow snaps back and
+            // the user gets a friendly reminder instead of advancing.
+            const countdownRemaining = targetDate - new Date();
+            if (countdownRemaining > 0) {
+                // Before the birthday, the arrow makes a partial flight: it
+                // rises toward the balloons, reaches the middle, then falls
+                // back down. It never reaches the balloons or advances.
+                nockedArrow.style.opacity = '0';
+                resetBowString(false);
+
+                flyingArrow.classList.remove('hidden');
+                flyingArrow.style.position = 'absolute';
+                flyingArrow.style.left = '50%';
+                flyingArrow.style.bottom = '8px';
+                flyingArrow.style.opacity = '1';
+                flyingArrow.style.transition = 'none';
+                flyingArrow.style.transform = 'translateX(-50%) translateY(0) rotate(0deg) scale(1)';
+                void flyingArrow.offsetWidth;
+
+                const bowRect = bowContainer.getBoundingClientRect();
+                const balloonsRect = targetBalloons.getBoundingClientRect();
+                const arrowHeight = flyingArrow.getBoundingClientRect().height;
+                const fullTargetDistance = Math.max(90, bowRect.bottom - (balloonsRect.bottom - arrowHeight * 0.55));
+                const midDistance = Math.max(70, fullTargetDistance * 0.52);
+
+                flyingArrow.style.transition = 'transform 500ms cubic-bezier(.08,.82,.18,1)';
+                flyingArrow.style.transform = `translateX(-50%) translateY(-${midDistance}px) rotate(-2deg) scale(1.03)`;
+
+                const trail = flyingArrow.querySelector('.arrow-trail');
+                if (trail) {
+                    trail.animate(
+                        [
+                            { opacity: 0, transform: 'translate(-50%,-50%) scaleY(.4)' },
+                            { opacity: .75, transform: 'translate(-50%,-50%) scaleY(1)' },
+                            { opacity: 0, transform: 'translate(-50%,-50%) scaleY(1.15)' }
+                        ],
+                        { duration: 460, easing: 'ease-out', fill: 'forwards' }
+                    );
+                }
+
+                setTimeout(() => {
+                    flyingArrow.style.transition = 'transform 620ms cubic-bezier(.45,.05,.8,.45), opacity 180ms ease';
+                    flyingArrow.style.transform = 'translateX(-50%) translateY(8px) rotate(7deg) scale(.94)';
+
+                    setTimeout(() => {
+                        flyingArrow.style.opacity = '0';
+                        nockedArrow.style.opacity = '1';
+                        resetBowString(false);
+                        showBirthdayWarning();
+                    }, 620);
+                }, 500);
+
+                return;
+            }
+
             hasShot = true;
 
             nockedArrow.style.opacity = '0';
