@@ -514,6 +514,31 @@
                 height 0.9s cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 0.6s ease;
             will-change: transform, width, height;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Keep the letter UI stable while the paper is sliding out. */
+        .letter-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            opacity: 0;
+            transform: translateZ(0);
+            pointer-events: none;
+            will-change: opacity;
+        }
+
+        .envelope-wrapper.is-open .letter-content,
+        .envelope-wrapper.instant-open .letter-content {
+            animation: letterContentReveal 0.35s ease forwards;
+            animation-delay: 1.05s;
+        }
+
+        @keyframes letterContentReveal {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @media (min-width: 768px) {
@@ -529,11 +554,19 @@
             opacity: 0;
             transform: translateY(8px);
             filter: blur(2px);
+            will-change: opacity, transform, filter;
         }
 
         .envelope-wrapper.is-open .letter-word {
             animation: letterWordReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             animation-delay: calc(1.05s + var(--word-index) * 0.075s);
+        }
+
+        .envelope-wrapper.instant-open .letter-word {
+            opacity: 1;
+            transform: none;
+            filter: none;
+            animation: none;
         }
 
         @keyframes letterWordReveal {
@@ -643,6 +676,11 @@
 
         .envelope-wrapper.instant-open .envelope-seal {
             opacity: 0;
+        }
+
+        .envelope-wrapper.instant-open .letter-content {
+            animation: none;
+            opacity: 1;
         }
 
         .envelope-wrapper.instant-open .envelope-letter {
@@ -902,13 +940,15 @@
         <div id="envelope-wrapper" class="envelope-wrapper mt-[-8vh]" onclick="openEnvelope()">
             <div class="envelope-back"></div>
             
-            <div id="envelope-letter" class="envelope-letter" onclick="event.stopPropagation()">
-                <h3 class="title-font text-2xl md:text-4xl text-pink-500 mb-2 md:mb-3 text-center border-b border-pink-100 pb-2 md:pb-3">My Dearest Santhu,</h3>
-                <div class="font-light text-gray-700 text-xs md:text-base leading-relaxed overflow-y-auto pr-2 custom-scrollbar flex-grow">
-                    <p class="mb-2 md:mb-3 mt-1">Happy Birthday! 🎂</p>
-                    <p class="mb-2 md:mb-3">You make every single day brighter just by being in it. I cherish all these beautiful memories we've made, and I can't wait to create a million more together.</p>
-                    <p class="mb-2 md:mb-3">May your day be as sweet, gorgeous, and absolutely perfect as you are.</p>
-                    <p class="text-right text-pink-500 font-medium mt-4 md:mt-6 title-font text-xl md:text-2xl">Forever Yours, <br>❤️</p>
+            <div id="envelope-letter" class="envelope-letter">
+                <div class="letter-content">
+                    <h3 class="title-font text-2xl md:text-4xl text-pink-500 mb-2 md:mb-3 text-center border-b border-pink-100 pb-2 md:pb-3">My Dearest Santhu,</h3>
+                    <div class="font-light text-gray-700 text-xs md:text-base leading-relaxed overflow-y-auto pr-2 custom-scrollbar flex-grow">
+                        <p class="mb-2 md:mb-3 mt-1">Happy Birthday! 🎂</p>
+                        <p class="mb-2 md:mb-3">You make every single day brighter just by being in it. I cherish all these beautiful memories we've made, and I can't wait to create a million more together.</p>
+                        <p class="mb-2 md:mb-3">May your day be as sweet, gorgeous, and absolutely perfect as you are.</p>
+                        <p class="text-right text-pink-500 font-medium mt-4 md:mt-6 title-font text-xl md:text-2xl">Forever Yours, <br>❤️</p>
+                    </div>
                 </div>
             </div>
             
@@ -1200,6 +1240,34 @@
         }
 
         // --- VIEWS NAVIGATION LOGIC ---
+        // Navigation uses one guarded transition so rapid left/right clicks cannot
+        // leave two views half-transitioned or execute an old callback late.
+        let navigationBusy = false;
+        let navigationTimer = null;
+
+        function beginNavigation() {
+            if (navigationBusy) return false;
+            navigationBusy = true;
+            document.querySelectorAll('#celebration-view button, #gallery-view button, #letter-view button')
+                .forEach(btn => btn.disabled = true);
+            if (navigationTimer) clearTimeout(navigationTimer);
+            return true;
+        }
+
+        function endNavigation() {
+            navigationBusy = false;
+            document.querySelectorAll('#celebration-view button, #gallery-view button, #letter-view button')
+                .forEach(btn => btn.disabled = false);
+        }
+
+        function finishNavigation(callback) {
+            navigationTimer = setTimeout(() => {
+                navigationTimer = null;
+                callback();
+                endNavigation();
+            }, 500);
+        }
+
         const mainContent = document.getElementById('countdown-view');
         const celebrationView = document.getElementById('celebration-view');
         const celebrationCard = document.getElementById('celebration-card');
@@ -1219,56 +1287,68 @@
         }
 
         function showCelebrationFromGallery() {
+            if (!beginNavigation()) return;
+
             galleryView.style.opacity = '0';
-            setTimeout(() => {
+            finishNavigation(() => {
                 galleryView.style.visibility = 'hidden';
                 galleryView.classList.remove('active');
-                
+                galleryView.style.opacity = '0';
+
                 celebrationView.style.visibility = 'visible';
                 celebrationView.style.opacity = '1';
                 celebrationView.classList.add('active');
-            }, 500);
+            });
         }
 
         function showGallery() {
+            if (!beginNavigation()) return;
+
             celebrationView.style.opacity = '0';
-            setTimeout(() => {
+            finishNavigation(() => {
                 celebrationView.style.visibility = 'hidden';
                 celebrationView.classList.remove('active');
-                
+                celebrationView.style.opacity = '0';
+
                 galleryView.style.visibility = 'visible';
                 galleryView.style.opacity = '1';
                 galleryView.classList.add('active');
-            }, 500);
+            });
         }
 
         function showLetterView() {
+            if (!beginNavigation()) return;
+
             galleryView.style.opacity = '0';
-            setTimeout(() => {
+            finishNavigation(() => {
                 galleryView.style.visibility = 'hidden';
                 galleryView.classList.remove('active');
-                
+                galleryView.style.opacity = '0';
+
                 letterView.style.visibility = 'visible';
                 letterView.style.opacity = '1';
                 letterView.classList.add('active');
 
                 const envelopeWrapper = document.getElementById('envelope-wrapper');
-                if (isEnvelopeOpened && !envelopeWrapper.classList.contains('instant-open')) {
-                    envelopeWrapper.classList.add('instant-open');
+                if (isEnvelopeOpened) {
+                    envelopeWrapper.classList.add('instant-open', 'is-open');
                 }
-            }, 500);
+            });
         }
 
         function goBackToGalleryFromLetter() {
+            if (!beginNavigation()) return;
+
             letterView.style.opacity = '0';
-            setTimeout(() => {
+            finishNavigation(() => {
                 letterView.style.visibility = 'hidden';
                 letterView.classList.remove('active');
-                
+                letterView.style.opacity = '0';
+
                 galleryView.style.visibility = 'visible';
                 galleryView.style.opacity = '1';
                 galleryView.classList.add('active');
-            }, 500);
+            });
         }
 
         // --- POLAROID CAMERA LOGIC ---
@@ -1329,11 +1409,15 @@
                 addPhotoToGallery(currentPhotoIndex);
                 currentPhotoIndex++;
 
+                const instruction = document.getElementById('camera-instruction');
+
                 if (currentPhotoIndex >= memories.length) {
-                    const instruction = document.getElementById('camera-instruction');
                     instruction.innerHTML = "All memories captured! 💖";
                     instruction.classList.remove('animate-bounce');
+                } else if (currentPhotoIndex === 1) {
+                    instruction.innerHTML = "Capture more moments 📸";
                 }
+
                 isAnimatingPhoto = false;
             }, 850);
         }
