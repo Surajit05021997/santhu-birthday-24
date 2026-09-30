@@ -173,6 +173,48 @@
             50% { transform: translateX(-8px); }
         }
 
+        /* Mobile countdown typography */
+        @media (max-width: 767px) {
+            #countdown-view .glass-card {
+                padding: 1.25rem 1rem;
+            }
+
+            #main-title {
+                font-size: 2.15rem !important;
+                line-height: 1.1;
+            }
+
+            #main-subtitle {
+                font-size: 0.9rem !important;
+                line-height: 1.4;
+            }
+
+            #countdown-view .grid > div {
+                padding: 0.65rem 0.3rem;
+            }
+
+            #countdown-view .grid > div > span:first-child {
+                font-size: 1.85rem !important;
+                line-height: 1;
+            }
+
+            #countdown-view .grid > div > span:last-child {
+                font-size: 0.65rem !important;
+                letter-spacing: 0.12em;
+            }
+
+            #arrow-instruction {
+                font-size: 0.78rem !important;
+                line-height: 1.35;
+            }
+
+            #countdown-view > .glass-card > span {
+                font-size: 0.68rem !important;
+                padding-left: 0.65rem;
+                padding-right: 0.65rem;
+            }
+        }
+
         /* Enhanced Balloon + Bow/Arrow Animation Styles */
         .realistic-balloon {
             width: 34px;
@@ -1078,9 +1120,30 @@
 
             void flyingArrow.offsetWidth;
 
+            // Keep the arrow inside the card on small screens.
+            // The target balloons sit above the bow, so we calculate the travel
+            // distance from the actual positions instead of using a fixed 308px.
+            const bowRect = bowContainer.getBoundingClientRect();
+            const balloonsRect = targetBalloons.getBoundingClientRect();
+            const arrowHeight = flyingArrow.getBoundingClientRect().height;
+            const card = document.querySelector('#countdown-view .glass-card');
+            const cardRect = card ? card.getBoundingClientRect() : null;
+
+            const targetY = balloonsRect.bottom - arrowHeight * 0.55;
+            const safeTop = cardRect ? cardRect.top + 8 : 0;
+            const travelDistance = Math.max(
+                90,
+                Math.min(
+                    bowRect.bottom - targetY,
+                    bowRect.bottom - safeTop - arrowHeight - 8
+                )
+            );
+
+            flyingArrow.dataset.travel = String(travelDistance);
+
             // The arrow accelerates first, then eases into the target like a real shot.
             flyingArrow.style.transition = 'transform 620ms cubic-bezier(.08,.82,.18,1), opacity 120ms ease';
-            flyingArrow.style.transform = 'translateX(-50%) translateY(-308px) rotate(-2deg) scale(1.04)';
+            flyingArrow.style.transform = `translateX(-50%) translateY(-${travelDistance}px) rotate(-2deg) scale(1.04)`;
 
             const trail = flyingArrow.querySelector('.arrow-trail');
             if (trail) {
@@ -1096,8 +1159,9 @@
 
             setTimeout(() => {
                 // Tiny impact pause sells the hit before the balloons burst.
+                const travelDistance = Number(flyingArrow.dataset.travel || 0);
                 flyingArrow.style.transition = 'transform 90ms ease-out, opacity 160ms ease';
-                flyingArrow.style.transform = 'translateX(-50%) translateY(-308px) rotate(-2deg) scale(1.12)';
+                flyingArrow.style.transform = `translateX(-50%) translateY(-${travelDistance}px) rotate(-2deg) scale(1.12)`;
 
                 playBirthdayMusic();
                 confetti({ particleCount: 55, spread: 55, startVelocity: 35, origin: { y: 0.2 } });
@@ -1191,12 +1255,12 @@
 
         // --- POLAROID CAMERA LOGIC ---
         const memories = [
-            { caption: "First Date", img: "https://placehold.co/400x450/ffb6c1/ffffff?text=Photo+1" },
-            { caption: "That sweet moment", img: "https://placehold.co/400x450/fcd34d/ffffff?text=Photo+2" },
-            { caption: "Laughing together", img: "https://placehold.co/400x450/a78bfa/ffffff?text=Photo+3" },
-            { caption: "Adventure time", img: "https://placehold.co/400x450/ff7eb3/ffffff?text=Photo+4" },
-            { caption: "Just us", img: "https://placehold.co/400x450/9b51e0/ffffff?text=Photo+5" },
-            { caption: "Forever", img: "https://placehold.co/400x450/ff4b82/ffffff?text=Photo+6" }
+            { caption: "First Date", img: "photo_1.jpg" },
+            { caption: "That sweet moment", img: "photo_2.jpg" },
+            { caption: "Laughing together", img: "photo_3.jpg" },
+            { caption: "Adventure time", img: "photo_4.jpg" },
+            { caption: "Just us", img: "photo_5.jpg" },
+            { caption: "Forever", img: "photo_6.jpg" }
         ];
 
         let currentPhotoIndex = 0;
