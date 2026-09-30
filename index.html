@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Counting Down To You</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Canvas Confetti for the Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Load FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(-45deg, #ff4b82, #ff7eb3, #9b51e0, #ff4b82);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            height: 100vh;
+        }
+
+        .title-font {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .heart-particle {
+            position: absolute;
+            bottom: -10vh;
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.4);
+            animation: floatUp linear forwards;
+            z-index: 0;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(-110vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 1.2s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); visibility: hidden; }
+        }
+
+        .fade-in-scale {
+            animation: fadeInScale 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Celebration View Styles */
+        #celebration-view {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease, visibility 1s ease;
+            z-index: 20;
+        }
+        
+        #celebration-view.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .main-content-fade-out {
+            animation: fadeOut 0.6s ease-out forwards !important;
+            pointer-events: none;
+        }
+
+        /* Gallery View Styles */
+        #gallery-view {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            z-index: 30;
+            background: transparent;
+        }
+
+        #gallery-view.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .polaroid {
+            background: #ffffff;
+            padding: 10px 10px 45px 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+        }
+
+        .polaroid:hover {
+            transform: scale(1.15) rotate(0deg) !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            z-index: 50;
+        }
+
+        .polaroid-caption {
+            font-family: 'Dancing Script', cursive;
+            color: #333;
+            text-align: center;
+            font-size: 1.6rem;
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .animate-bounce-h {
+            animation: bounceHorizontal 2s infinite;
+        }
+
+        @keyframes bounceHorizontal {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        .animate-bounce-h-reverse {
+            animation: bounceHorizontalReverse 2s infinite;
+        }
+
+        @keyframes bounceHorizontalReverse {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+
+        /* Realistic Balloon Styles */
+        .realistic-balloon {
+            width: 38px;
+            height: 48px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            position: relative;
+            box-shadow: inset -6px -6px 15px rgba(0, 0, 0, 0.25), 0 8px 15px rgba(0, 0, 0, 0.2);
+            animation: floatBalloon 3s ease-in-out infinite;
+        }
+        .realistic-balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: calc(50% - 3px);
+            width: 6px;
+            height: 6px;
+            background: inherit;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+        .balloon-highlight {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 8px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: rotate(-25deg);
+        }
+
+        @keyframes floatBalloon {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        /* Letter View & Envelope Styles */
+        #letter-view {
+            opacity: 0;
+            visibility: hidden;
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            z-index: 40;
+        }
+
+        #letter-view.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .envelope-wrapper:not(.is-open):hover {
+            transform: translateY(-8px);
+        }
+
+        .envelope-back {
+            position: absolute;
+            inset: 0;
+            background: #ec4899; 
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .envelope-front {
+            position: absolute;
+            inset: 0;
+            background: #f472b6; 
+            clip-path: polygon(0 100%, 100% 100%, 100% 0, 50% 65%, 0 0);
+            z-index: 30;
+            border-radius: 0 0 8px 8px;
+            pointer-events: none;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 60%;
+            background: #db2777; 
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            z-index: 40;
+            transform-origin: top;
+            transition: transform 0.5s ease-in-out;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .envelope-seal {
+            position: absolute;
+            top: 58%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45px;
+            height: 45px;
+            background: #be185d; 
+            border-radius: 50%;
+            z-index: 45;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: opacity 0.3s;
+        }
+
+        .envelope-letter {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%); 
+            width: calc(100% - 20px);
+            max-width: 95vw;
+            height: 200px;
+            background: #fffafa;
+            border-radius: 6px;
+            z-index: 20;
+            padding: 24px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .envelope-wrapper.is-open {
+            transform: translateY(80px); 
+            cursor: default;
+        }
+        .envelope-wrapper.is-open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 10;
+            transition: transform 0.5s ease-in-out, z-index 0s 0.5s;
+        }
+        .envelope-wrapper.is-open .envelope-seal {
+            opacity: 0;
+        }
+        .envelope-wrapper.is-open .envelope-letter {
+            animation: extractLetter 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes extractLetter {
+            0% { transform: translateX(-50%) translateY(0); height: 200px; width: calc(100% - 20px); z-index: 20; }
+            49% { transform: translateX(-50%) translateY(-230px); height: 200px; width: calc(100% - 20px); z-index: 20; }
+            50% { transform: translateX(-50%) translateY(-230px); height: 200px; width: calc(100% - 20px); z-index: 60; }
+            100% { transform: translateX(-50%) translateY(-50px); height: 400px; width: calc(100% + 20px); z-index: 60; }
+        }
+
+        .envelope-wrapper.instant-open {
+            transform: translateY(80px);
+            cursor: default;
+        }
+        .envelope-wrapper.instant-open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 10;
+        }
+        .envelope-wrapper.instant-open .envelope-seal {
+            opacity: 0;
+        }
+        .envelope-wrapper.instant-open .envelope-letter {
+            transform: translateX(-50%) translateY(-50px);
+            height: 400px;
+            width: calc(100% + 20px);
+            z-index: 60;
+            animation: none;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #fbcfe8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="relative flex items-center justify-center min-h-screen antialiased text-white">
+    
+    <!-- Container for floating hearts -->
+    <div id="hearts-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+    <div id="confetti-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- View 1: Main Countdown Card with Bow, Arrow & Balloons Cluster -->
+    <main id="countdown-view" class="absolute z-10 w-full max-w-2xl p-6 mx-4 fade-in-up transition-all duration-500">
+        <div class="glass-card rounded-[2.5rem] p-6 md:p-10 text-center relative overflow-hidden">
+            
+            <!-- Target Balloons Cluster at the Top -->
+            <div id="target-balloons" class="flex items-center justify-center gap-3 mb-4 transition-all duration-300">
+                <div class="flex flex-col items-center">
+                    <div class="realistic-balloon bg-gradient-to-tr from-pink-500 to-rose-400 balloon-float" style="animation-delay: 0s;">
+                        <div class="balloon-highlight"></div>
+                    </div>
+                    <div class="w-[1px] h-3 bg-white/40"></div>
+                </div>
+                <div class="flex flex-col items-center -translate-y-2">
+                    <div class="realistic-balloon bg-gradient-to-tr from-purple-500 to-pink-400 balloon-float" style="animation-delay: 0.5s;">
+                        <div class="balloon-highlight"></div>
+                    </div>
+                    <div class="w-[1px] h-3 bg-white/40"></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="realistic-balloon bg-gradient-to-tr from-rose-500 to-amber-400 balloon-float" style="animation-delay: 1s;">
+                        <div class="balloon-highlight"></div>
+                    </div>
+                    <div class="w-[1px] h-3 bg-white/40"></div>
+                </div>
+            </div>
+            <span class="text-[10px] tracking-wider uppercase text-pink-100 font-medium bg-white/10 px-3 py-0.5 rounded-full border border-white/20 inline-block mb-3">Shoot the balloons to open! 🎯</span>
+
+            <!-- Header -->
+            <div class="mb-2">
+                <h1 id="main-title" class="title-font text-4xl md:text-5xl lg:text-6xl mb-1 tracking-wide font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-pink-100 drop-shadow-sm">
+                    For My Love
+                </h1>
+                <p id="main-subtitle" class="text-sm md:text-base font-light text-pink-50 tracking-wide">
+                    Counting every moment until your special day...
+                </p>
+            </div>
+
+            <!-- Countdown Grid -->
+            <div class="grid grid-cols-4 gap-2 md:gap-4 my-4">
+                <div class="flex flex-col items-center bg-white/10 rounded-2xl p-2 md:p-4 border border-white/20">
+                    <span id="days" class="text-3xl md:text-5xl font-semibold glow-text tabular-nums tracking-tighter">00</span>
+                    <span class="text-[10px] md:text-xs uppercase tracking-widest mt-1 text-pink-100 opacity-90 font-medium">Days</span>
+                </div>
+                <div class="flex flex-col items-center bg-white/10 rounded-2xl p-2 md:p-4 border border-white/20">
+                    <span id="hours" class="text-3xl md:text-5xl font-semibold glow-text tabular-nums tracking-tighter">00</span>
+                    <span class="text-[10px] md:text-xs uppercase tracking-widest mt-1 text-pink-100 opacity-90 font-medium">Hours</span>
+                </div>
+                <div class="flex flex-col items-center bg-white/10 rounded-2xl p-2 md:p-4 border border-white/20">
+                    <span id="minutes" class="text-3xl md:text-5xl font-semibold glow-text tabular-nums tracking-tighter">00</span>
+                    <span class="text-[10px] md:text-xs uppercase tracking-widest mt-1 text-pink-100 opacity-90 font-medium">Mins</span>
+                </div>
+                <div class="flex flex-col items-center bg-white/10 rounded-2xl p-2 md:p-4 border border-white/20">
+                    <span id="seconds" class="text-3xl md:text-5xl font-semibold glow-text tabular-nums tracking-tighter">00</span>
+                    <span class="text-[10px] md:text-xs uppercase tracking-widest mt-1 text-pink-100 opacity-90 font-medium">Secs</span>
+                </div>
+            </div>
+
+            <!-- Interactive Bow & Arrow Launchpad -->
+            <div class="mt-2 flex flex-col items-center justify-center relative">
+                <p id="arrow-instruction" class="text-xs text-pink-200 font-medium mb-2 animate-pulse">
+                    Pull down on the arrow & release to shoot! 🏹
+                </p>
+
+                <!-- Bow & Arrow Interactive Area -->
+                <div id="bow-container" class="relative w-28 h-24 flex items-center justify-center cursor-grab active:cursor-grabbing select-none" onmousedown="startDrag(event)" ontouchstart="startDrag(event)">
+                    
+                    <!-- Flying Arrow Animation Element -->
+                    <div id="flying-arrow" class="absolute hidden flex flex-col items-center pointer-events-none z-50 transition-none" style="width: 24px; height: 72px; flex-shrink: 0;">
+                        <i class="fa-solid fa-chevron-up text-amber-300 text-2xl drop-shadow-[0_0_8px_rgba(252,211,77,0.9)]" style="flex-shrink: 0; line-height: 1;"></i>
+                        <div class="bg-gradient-to-t from-amber-500 via-yellow-200 to-amber-300 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.8)]" style="width: 5px; height: 48px; flex-shrink: 0;"></div>
+                        <i class="fa-solid fa-heart text-rose-500 text-sm drop-shadow" style="flex-shrink: 0; margin-top: -2px; line-height: 1;"></i>
+                    </div>
+
+                    <!-- Bow Graphic -->
+                    <div class="relative w-20 h-20 flex items-center justify-center">
+                        <svg class="absolute inset-0 w-full h-full drop-shadow-md" viewBox="0 0 100 100">
+                            <path d="M 20 10 Q 80 50 20 90" fill="none" stroke="url(#bowGrad)" stroke-width="6" stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="bowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#f472b6" />
+                                    <stop offset="100%" stop-color="#9333ea" />
+                                </linearGradient>
+                            </defs>
+                            <line id="bow-string" x1="22" y1="15" x2="22" y2="85" stroke="rgba(255,255,255,0.6)" stroke-width="2" />
+                        </svg>
+
+                        <!-- Ready Arrow Nocked in Bow -->
+                        <div id="nocked-arrow" class="absolute flex flex-col items-center pointer-events-none" style="transform: translateY(0px); width: 24px; height: 64px; flex-shrink: 0;">
+                            <i class="fa-solid fa-chevron-up text-amber-300 text-lg drop-shadow-[0_0_6px_rgba(252,211,77,0.8)]" style="flex-shrink: 0; line-height: 1;"></i>
+                            <div class="bg-gradient-to-t from-amber-500 via-yellow-200 to-amber-300 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" style="width: 5px; height: 40px; flex-shrink: 0;"></div>
+                            <i class="fa-solid fa-heart text-rose-500 text-xs drop-shadow" style="flex-shrink: 0; margin-top: -2px; line-height: 1;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning Message Toast -->
+                <div id="warning-toast" class="absolute -bottom-4 bg-black/70 backdrop-blur-md text-pink-200 px-4 py-1.5 rounded-full text-xs font-medium border border-white/20 opacity-0 transition-all duration-300 pointer-events-none shadow-lg z-50 whitespace-nowrap">
+                    ✨ It's not your birthday yet, my love!
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Celebration View -->
+    <section id="celebration-view">
+        <div class="glass-card rounded-[2.5rem] p-10 md:p-16 w-full max-w-3xl mx-4 text-center transform scale-95 transition-transform duration-1000" id="celebration-card">
+            <i class="fa-solid fa-cake-candles text-5xl text-pink-300 mb-6 drop-shadow-lg"></i>
+            <h1 class="title-font text-6xl md:text-8xl mb-4 tracking-wide font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-200 via-white to-purple-200 drop-shadow-md glow-text">
+                Happy Birthday, Santhu!
+            </h1>
+            <p class="text-xl md:text-2xl font-light text-pink-50 tracking-wide mt-6 leading-relaxed">
+                To the most amazing person in my life, may your day be as beautiful, sweet, and special as you are to me. I love you! ❤️
+            </p>
+            <div class="mt-10 flex justify-center gap-4">
+                <i class="fa-solid fa-heart text-2xl text-pink-400 animate-bounce" style="animation-delay: 0.1s"></i>
+                <i class="fa-solid fa-heart text-2xl text-purple-400 animate-bounce" style="animation-delay: 0.2s"></i>
+                <i class="fa-solid fa-heart text-2xl text-pink-400 animate-bounce" style="animation-delay: 0.3s"></i>
+            </div>
+        </div>
+
+        <!-- Forward to Gallery Button -->
+        <button onclick="showGallery()" class="fixed right-4 md:right-10 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 border border-white/30 text-white rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)] group z-50 animate-bounce-h">
+            <i class="fa-solid fa-chevron-right text-2xl group-hover:text-pink-200 transition-colors"></i>
+        </button>
+    </section>
+
+    <!-- Gallery View -->
+    <section id="gallery-view" class="fixed inset-0 overflow-y-auto flex flex-col">
+        
+        <!-- Forward to Letter View Button -->
+        <button onclick="showLetterView()" class="fixed right-4 md:right-10 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 border border-white/30 text-white rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)] group z-50 outline-none animate-bounce-h">
+            <i class="fa-solid fa-chevron-right text-2xl group-hover:text-pink-200 transition-colors"></i>
+        </button>
+
+        <div id="screen-flash" class="fixed inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-150 z-[100]"></div>
+
+        <div class="max-w-6xl mx-auto w-full flex flex-col items-center flex-grow pt-10 pb-12">
+            <div class="mb-8 text-center mt-6">
+                <h2 class="title-font text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-100 to-white drop-shadow-md glow-text mb-4">Our Beautiful Memories</h2>
+                <p class="text-pink-50 text-lg md:text-xl font-light drop-shadow">Every moment with you is a treasure ❤️</p>
+            </div>
+            
+            <div id="polaroid-container" class="flex flex-wrap justify-center gap-8 md:gap-12 w-full mt-4 z-10 relative px-4 md:px-10">
+                <!-- JavaScript populates polaroids here -->
+            </div>
+        </div>
+
+        <!-- Sticky Camera Dock -->
+        <div class="sticky bottom-0 w-full pt-10 pb-6 bg-white/10 backdrop-blur-xl border-t border-white/20 z-40 flex justify-center shadow-[0_-15px_50px_rgba(0,0,0,0.15)] transition-all mt-auto">
+            <div class="relative flex flex-col items-center z-20">
+                <div class="absolute -top-12 flex flex-col items-center drop-shadow-lg pointer-events-none z-50">
+                    <span id="camera-instruction" class="bg-black/60 text-white px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-md mb-1 animate-bounce whitespace-nowrap border border-white/20">
+                        Click shutter to capture our moments 📸
+                    </span>
+                    <div class="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-black/60"></div>
+                </div>
+
+                <button onclick="handleShutterClick()" class="relative w-16 h-8 cursor-pointer z-50 group translate-y-0.5 block outline-none">
+                    <div class="absolute bottom-0 left-0 w-full h-full bg-red-500 rounded-t-xl shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)] group-hover:bg-red-400 group-active:h-4 transition-all duration-150 border-2 border-b-0 border-red-700"></div>
+                </button>
+                
+                <div class="w-72 h-44 bg-gradient-to-br from-pink-200 to-pink-400 rounded-3xl relative shadow-[0_20px_40px_rgba(0,0,0,0.5)] border-4 border-white/50 flex items-center justify-center z-30">
+                    <div class="absolute -top-[2px] left-1/2 -translate-x-1/2 w-56 h-1.5 bg-gray-900 rounded-full shadow-inner z-30"></div>
+                    
+                    <div id="ejecting-photo" class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-56 bg-white p-3 shadow-2xl z-20 opacity-0 pointer-events-none flex flex-col rounded-sm border border-gray-200">
+                        <div class="w-full h-40 bg-gray-800 rounded-sm"></div>
+                    </div>
+
+                    <div class="absolute top-5 left-5 w-12 h-8 bg-white/90 rounded border-2 border-gray-300 flex items-center justify-center shadow-inner overflow-hidden z-40">
+                        <div id="flash-bulb" class="w-full h-full bg-yellow-100 opacity-0 transition-opacity duration-100"></div>
+                    </div>
+                    
+                    <div class="absolute top-6 right-6 w-10 h-6 bg-gray-800 rounded shadow-[inset_0_2px_5px_rgba(0,0,0,0.8)] border border-gray-700 z-40"></div>
+                    
+                    <div class="w-28 h-28 bg-gray-200 rounded-full flex items-center justify-center shadow-xl border-4 border-gray-300 relative z-40">
+                        <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center shadow-[inset_0_5px_15px_rgba(0,0,0,0.8)] relative overflow-hidden">
+                            <div class="absolute top-2 left-2 w-8 h-8 bg-white/20 rounded-full blur-[2px]"></div>
+                            <div class="w-8 h-8 bg-gray-900 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,1)]"></div>
+                            <div class="absolute bottom-2 right-3 w-4 h-4 bg-blue-400/20 rounded-full blur-[1px]"></div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-5 right-6 flex gap-2 z-40">
+                        <div class="w-3 h-3 rounded-full bg-pink-500/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]"></div>
+                        <div class="w-3 h-3 rounded-full bg-pink-500/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]"></div>
+                        <div class="w-3 h-3 rounded-full bg-pink-500/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Letter View -->
+    <section id="letter-view">
+        <button onclick="goBackToGalleryFromLetter()" class="fixed left-4 md:left-10 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 border border-white/30 text-white rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)] group z-50 outline-none animate-bounce-h-reverse">
+            <i class="fa-solid fa-chevron-left text-2xl group-hover:text-pink-200 transition-colors"></i>
+        </button>
+        
+        <div id="envelope-wrapper" class="envelope-wrapper mt-[-10vh]" onclick="openEnvelope()">
+            <div class="envelope-back"></div>
+            
+            <div class="envelope-letter" onclick="event.stopPropagation()">
+                <h3 class="title-font text-3xl md:text-4xl text-pink-500 mb-3 text-center border-b border-pink-100 pb-3">My Dearest Santhu,</h3>
+                <div class="font-light text-gray-700 text-sm md:text-base leading-relaxed overflow-y-auto pr-2 custom-scrollbar flex-grow">
+                    <p class="mb-3 mt-2">Happy Birthday! 🎂</p>
+                    <p class="mb-3">You make every single day brighter just by being in it. I cherish all these beautiful memories we've made, and I can't wait to create a million more together.</p>
+                    <p class="mb-3">May your day be as sweet, gorgeous, and absolutely perfect as you are.</p>
+                    <p class="text-right text-pink-500 font-medium mt-6 title-font text-2xl">Forever Yours, <br>❤️</p>
+                </div>
+            </div>
+            
+            <div class="envelope-front"></div>
+            <div class="envelope-flap"></div>
+            
+            <div class="envelope-seal">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-[110] bg-black/50 backdrop-blur-xl opacity-0 pointer-events-none transition-all duration-500 flex items-center justify-center p-4">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 md:top-10 md:right-10 text-white/70 hover:text-white text-4xl md:text-5xl transition-all duration-300 hover:rotate-90 z-50 outline-none drop-shadow-md">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        
+        <div id="lightbox-content" class="relative max-w-5xl w-full flex flex-col items-center transform scale-95 transition-transform duration-500 ease-out">
+            <img id="lightbox-img" src="" alt="Full screen memory" class="max-w-full max-h-[70vh] md:max-h-[80vh] object-contain rounded-sm shadow-[0_0_50px_rgba(255,255,255,0.1)] border border-white/20 p-2 bg-white">
+            <div id="lightbox-caption" class="title-font text-white text-4xl md:text-6xl md:mt-8 font-semibold drop-shadow-[0_2px_10px_rgba(0,0,0,1)] text-center tracking-wide"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. COUNTDOWN & BOW/ARROW INTERACTION ---
+        const targetDate = new Date('2026-10-09T00:00:00');
+        
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const mainSubtitle = document.getElementById('main-subtitle');
+
+        function updateCountdown() {
+            const currentTime = new Date();
+            const difference = targetDate - currentTime;
+
+            if (difference <= 0) {
+                daysEl.innerText = "00";
+                hoursEl.innerText = "00";
+                minutesEl.innerText = "00";
+                secondsEl.innerText = "00";
+                mainSubtitle.innerText = "It's your special day! 💖";
+                return;
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            daysEl.innerText = days < 10 ? '0' + days : days;
+            hoursEl.innerText = hours < 10 ? '0' + hours : hours;
+            minutesEl.innerText = minutes < 10 ? '0' + minutes : minutes;
+            secondsEl.innerText = seconds < 10 ? '0' + seconds : seconds;
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // --- BOW & ARROW DRAG & SHOOT MECHANIC ---
+        let isDragging = false;
+        let startY = 0;
+        let pullDistance = 0;
+        const maxPull = 45;
+
+        const nockedArrow = document.getElementById('nocked-arrow');
+        const flyingArrow = document.getElementById('flying-arrow');
+        const warningToast = document.getElementById('warning-toast');
+        const targetBalloons = document.getElementById('target-balloons');
+
+        function startDrag(e) {
+            isDragging = true;
+            startY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+            
+            window.addEventListener('mousemove', onDrag);
+            window.addEventListener('touchmove', onDrag);
+            window.addEventListener('mouseup', endDrag);
+            window.addEventListener('touchend', endDrag);
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+            let diff = currentY - startY;
+            
+            if (diff < 0) diff = 0;
+            if (diff > maxPull) diff = maxPull;
+            
+            pullDistance = diff;
+            nockedArrow.style.transform = `translateY(${pullDistance}px)`;
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            window.removeEventListener('mousemove', onDrag);
+            window.removeEventListener('touchmove', onDrag);
+            window.removeEventListener('mouseup', endDrag);
+            window.removeEventListener('touchend', endDrag);
+
+            if (pullDistance > 15) {
+                shootArrow();
+            } else {
+                nockedArrow.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                nockedArrow.style.transform = 'translateY(0px)';
+                setTimeout(() => { nockedArrow.style.transition = ''; }, 250);
+            }
+            pullDistance = 0;
+        }
+
+        function shootArrow() {
+            nockedArrow.style.opacity = '0';
+            nockedArrow.style.transform = 'translateY(0px)';
+
+            flyingArrow.classList.remove('hidden');
+            flyingArrow.style.transition = 'none';
+            flyingArrow.style.position = 'absolute';
+            flyingArrow.style.bottom = '20px';
+            flyingArrow.style.left = '50%';
+            flyingArrow.style.transform = 'translateX(-50%) scale(1)';
+            flyingArrow.style.opacity = '1';
+
+            void flyingArrow.offsetWidth;
+
+            const currentTime = new Date();
+            const isCountdownOver = currentTime >= targetDate; 
+
+            if (isCountdownOver) {
+                // Shoot all the way up to touch the balloons (~340px distance)
+                flyingArrow.style.transition = 'all 0.35s cubic-bezier(0.1, 0.8, 0.3, 1)';
+                flyingArrow.style.transform = 'translateX(-50%) translateY(-340px) scale(1)';
+
+                setTimeout(() => {
+                    targetBalloons.style.transition = 'all 0.2s ease';
+                    targetBalloons.style.transform = 'scale(1.3) translateY(-10px)';
+                    targetBalloons.style.opacity = '0';
+
+                    confetti({ particleCount: 120, spread: 90, origin: { y: 0.2 } });
+
+                    setTimeout(() => {
+                        showCelebration();
+                    }, 500);
+                }, 350);
+            } else {
+                // Fall short if countdown is active
+                flyingArrow.style.transition = 'all 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
+                flyingArrow.style.transform = 'translateX(-50%) translateY(-110px) scale(1)';
+
+                setTimeout(() => {
+                    flyingArrow.style.transition = 'all 0.3s ease-in';
+                    flyingArrow.style.transform = 'translateX(-50%) translateY(20px) scale(1)';
+                    flyingArrow.style.opacity = '0';
+
+                    warningToast.style.opacity = '1';
+                    warningToast.style.transform = 'translateY(-5px)';
+
+                    setTimeout(() => {
+                        warningToast.style.opacity = '0';
+                        warningToast.style.transform = 'translateY(0px)';
+                        nockedArrow.style.opacity = '1';
+                        flyingArrow.classList.add('hidden');
+                    }, 2200);
+                }, 300);
+            }
+        }
+
+
+        // --- 2. CELEBRATION & VIEWS NAVIGATION ---
+        const mainContent = document.getElementById('countdown-view');
+        const celebrationView = document.getElementById('celebration-view');
+        const celebrationCard = document.getElementById('celebration-card');
+        const galleryView = document.getElementById('gallery-view');
+        const letterView = document.getElementById('letter-view');
+
+        function showCelebration() {
+            mainContent.classList.add('main-content-fade-out');
+            setTimeout(() => {
+                mainContent.style.display = 'none';
+                celebrationView.classList.add('active');
+                celebrationCard.classList.remove('scale-95');
+                celebrationCard.classList.add('scale-100');
+            }, 600);
+        }
+
+        function showGallery() {
+            celebrationView.style.opacity = '0';
+            setTimeout(() => {
+                celebrationView.classList.remove('active');
+                celebrationView.style.display = 'none';
+                galleryView.classList.add('active');
+            }, 800);
+        }
+
+        function showLetterView() {
+            galleryView.style.opacity = '0';
+            setTimeout(() => {
+                galleryView.classList.remove('active');
+                galleryView.style.display = 'none';
+                
+                letterView.style.display = '';
+                setTimeout(() => {
+                    letterView.classList.add('active');
+                    const envelopeWrapper = document.getElementById('envelope-wrapper');
+                    if (isEnvelopeOpened && !envelopeWrapper.classList.contains('instant-open')) {
+                        envelopeWrapper.classList.add('instant-open');
+                    }
+                }, 50);
+            }, 800);
+        }
+
+        function goBackToGalleryFromLetter() {
+            letterView.classList.remove('active');
+            setTimeout(() => {
+                letterView.style.display = 'none';
+                galleryView.style.display = ''; 
+                setTimeout(() => {
+                    galleryView.classList.add('active');
+                    galleryView.style.opacity = '1';
+                }, 50);
+            }, 800);
+        }
+
+
+        // --- 3. POLAROID CAMERA LOGIC ---
+        const memories = [
+            { caption: "First Date", img: "https://placehold.co/400x450/ffb6c1/ffffff?text=Photo+1" },
+            { caption: "That sweet moment", img: "https://placehold.co/400x450/fcd34d/ffffff?text=Photo+2" },
+            { caption: "Laughing together", img: "https://placehold.co/400x450/a78bfa/ffffff?text=Photo+3" },
+            { caption: "Adventure time", img: "https://placehold.co/400x450/ff7eb3/ffffff?text=Photo+4" },
+            { caption: "Just us", img: "https://placehold.co/400x450/9b51e0/ffffff?text=Photo+5" },
+            { caption: "Forever", img: "https://placehold.co/400x450/ff4b82/ffffff?text=Photo+6" }
+        ];
+
+        let currentPhotoIndex = 0;
+        let isAnimatingPhoto = false;
+
+        function handleShutterClick() {
+            if (currentPhotoIndex >= memories.length || isAnimatingPhoto) return;
+            isAnimatingPhoto = true;
+
+            const flash = document.getElementById('screen-flash');
+            const flashBulb = document.getElementById('flash-bulb');
+            flash.style.opacity = '0.75';
+            flashBulb.style.opacity = '1';
+            
+            confetti({ particleCount: 25, spread: 50, origin: { y: 0.85 }, zIndex: 100 });
+
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                flashBulb.style.opacity = '0';
+            }, 150);
+
+            const ejectingPhoto = document.getElementById('ejecting-photo');
+            ejectingPhoto.style.transition = 'none';
+            ejectingPhoto.style.opacity = '1';
+            ejectingPhoto.style.transform = 'translate(-50%, 0) scale(0.5)';
+            
+            void ejectingPhoto.offsetWidth;
+            
+            ejectingPhoto.style.transition = 'all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
+            ejectingPhoto.style.transform = 'translate(-50%, -260px) scale(1.1)';
+
+            setTimeout(() => {
+                ejectingPhoto.style.opacity = '0';
+                addPhotoToGallery(currentPhotoIndex);
+                currentPhotoIndex++;
+
+                if (currentPhotoIndex >= memories.length) {
+                    const instruction = document.getElementById('camera-instruction');
+                    instruction.innerHTML = "All memories captured! 💖";
+                    instruction.classList.remove('animate-bounce');
+                }
+                isAnimatingPhoto = false;
+            }, 850);
+        }
+
+        function addPhotoToGallery(index) {
+            const container = document.getElementById('polaroid-container');
+            const mem = memories[index];
+            
+            const div = document.createElement('div');
+            div.className = 'polaroid w-52 md:w-72 rounded-sm border border-gray-100';
+            
+            const angle = Math.floor(Math.random() * 24) - 12;
+            div.style.transform = `rotate(${angle}deg)`;
+            div.onclick = () => openLightbox(index);
+            
+            div.innerHTML = `
+                <img src="${mem.img}" alt="${mem.caption}" class="w-full h-56 md:h-80 object-cover rounded-sm filter contrast-110">
+                <div class="polaroid-caption">${mem.caption}</div>
+            `;
+            
+            div.style.animation = `fadeInScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards`;
+            container.appendChild(div);
+
+            const galleryScrollArea = document.getElementById('gallery-view');
+            galleryScrollArea.scrollTo({ top: galleryScrollArea.scrollHeight, behavior: 'smooth' });
+        }
+
+
+        // --- 4. FLOATING HEARTS & LIGHTBOX ---
+        const heartsContainer = document.getElementById('hearts-container');
+        const heartIcons = ['fa-heart', 'fa-heart', 'fa-star'];
+
+        function createHeart() {
+            const heart = document.createElement('i');
+            const randomIcon = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+            heart.classList.add('fa-solid', randomIcon, 'heart-particle');
+            
+            const size = Math.random() * 20 + 10; 
+            const leftPosition = Math.random() * 100; 
+            const animationDuration = Math.random() * 8 + 6; 
+            const delay = Math.random() * 2; 
+            
+            heart.style.fontSize = `${size}px`;
+            heart.style.left = `${leftPosition}%`;
+            heart.style.animationDuration = `${animationDuration}s`;
+            heart.style.animationDelay = `${delay}s`;
+            
+            heartsContainer.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, (animationDuration + delay) * 1000);
+        }
+
+        for(let i = 0; i < 15; i++) setTimeout(createHeart, Math.random() * 2000);
+        setInterval(createHeart, 400);
+
+        let isEnvelopeOpened = false;
+        function openEnvelope() {
+            const envelopeWrapper = document.getElementById('envelope-wrapper');
+            if (!envelopeWrapper.classList.contains('is-open') && !envelopeWrapper.classList.contains('instant-open')) {
+                envelopeWrapper.classList.add('is-open');
+                isEnvelopeOpened = true;
+                setTimeout(() => {
+                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.4 }, zIndex: 100 });
+                }, 800);
+            }
+        }
+
+        const lightboxModal = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxContent = document.getElementById('lightbox-content');
+
+        function openLightbox(index) {
+            const mem = memories[index];
+            lightboxImg.src = mem.img;
+            lightboxCaption.innerText = mem.caption;
+            lightboxModal.classList.remove('opacity-0', 'pointer-events-none');
+            lightboxModal.classList.add('opacity-100', 'pointer-events-auto');
+            lightboxContent.classList.remove('scale-95');
+            lightboxContent.classList.add('scale-100');
+        }
+
+        function closeLightbox() {
+            lightboxModal.classList.remove('opacity-100', 'pointer-events-auto');
+            lightboxModal.classList.add('opacity-0', 'pointer-events-none');
+            lightboxContent.classList.remove('scale-100');
+            lightboxContent.classList.add('scale-95');
+        }
+
+        lightboxModal.addEventListener('click', function(e) {
+            if (e.target === lightboxModal || e.target === lightboxContent) {
+                closeLightbox();
+            }
+        });
+    </script>
+</body>
+</html>
