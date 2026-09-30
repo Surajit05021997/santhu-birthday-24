@@ -472,6 +472,32 @@
             }
         }
 
+        /* Word-by-word letter reveal */
+        .letter-word {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(8px);
+            filter: blur(2px);
+        }
+
+        .envelope-wrapper.is-open .letter-word {
+            animation: letterWordReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: calc(1.05s + var(--word-index) * 0.075s);
+        }
+
+        @keyframes letterWordReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(8px);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0);
+            }
+        }
+
         /* The envelope itself stays still while the flap opens. */
         .envelope-wrapper.is-open {
             transform: translateY(40px);
@@ -825,7 +851,7 @@
         <div id="envelope-wrapper" class="envelope-wrapper mt-[-8vh]" onclick="openEnvelope()">
             <div class="envelope-back"></div>
             
-            <div class="envelope-letter" onclick="event.stopPropagation()">
+            <div id="envelope-letter" class="envelope-letter" onclick="event.stopPropagation()">
                 <h3 class="title-font text-2xl md:text-4xl text-pink-500 mb-2 md:mb-3 text-center border-b border-pink-100 pb-2 md:pb-3">My Dearest Santhu,</h3>
                 <div class="font-light text-gray-700 text-xs md:text-base leading-relaxed overflow-y-auto pr-2 custom-scrollbar flex-grow">
                     <p class="mb-2 md:mb-3 mt-1">Happy Birthday! 🎂</p>
@@ -1264,6 +1290,51 @@
 
         for(let i = 0; i < 15; i++) setTimeout(createHeart, Math.random() * 2000);
         setInterval(createHeart, 400);
+
+        // Wrap every word in the letter so it can appear naturally, one word at a time.
+        function prepareLetterWordAnimation() {
+            const letter = document.getElementById('envelope-letter');
+            if (!letter || letter.dataset.wordsPrepared === 'true') return;
+
+            let wordIndex = 0;
+            const walker = document.createTreeWalker(
+                letter,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode(node) {
+                        if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                        if (node.parentElement.closest('.letter-word')) return NodeFilter.FILTER_REJECT;
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                }
+            );
+
+            const textNodes = [];
+            while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+            textNodes.forEach(node => {
+                const fragment = document.createDocumentFragment();
+                const parts = node.nodeValue.split(/(\s+)/);
+
+                parts.forEach(part => {
+                    if (/^\s+$/.test(part)) {
+                        fragment.appendChild(document.createTextNode(part));
+                    } else if (part) {
+                        const span = document.createElement('span');
+                        span.className = 'letter-word';
+                        span.style.setProperty('--word-index', wordIndex++);
+                        span.textContent = part;
+                        fragment.appendChild(span);
+                    }
+                });
+
+                node.parentNode.replaceChild(fragment, node);
+            });
+
+            letter.dataset.wordsPrepared = 'true';
+        }
+
+        prepareLetterWordAnimation();
 
         let isEnvelopeOpened = false;
         function openEnvelope() {
