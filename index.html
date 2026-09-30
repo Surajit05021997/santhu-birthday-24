@@ -945,8 +945,8 @@
                     <h3 class="title-font text-2xl md:text-4xl text-pink-500 mb-2 md:mb-3 text-center border-b border-pink-100 pb-2 md:pb-3">My Dearest Santhu,</h3>
                     <div class="font-light text-gray-700 text-xs md:text-base leading-relaxed overflow-y-auto pr-2 custom-scrollbar flex-grow">
                         <p class="mb-2 md:mb-3 mt-1">Happy Birthday! 🎂</p>
-                        <p class="mb-2 md:mb-3">You make every single day brighter just by being in it. I cherish all these beautiful memories we've made, and I can't wait to create a million more together.</p>
-                        <p class="mb-2 md:mb-3">May your day be as sweet, gorgeous, and absolutely perfect as you are.</p>
+                        <p class="mb-2 md:mb-3">Life is just so better with you around. I look back at everything we've done together and smile, and I'm so excited for everything still ahead of us.</p>
+                        <p class="mb-2 md:mb-3">So glad you came into my life.</p>
                         <p class="text-right text-pink-500 font-medium mt-4 md:mt-6 title-font text-xl md:text-2xl">Forever Yours, <br>❤️</p>
                     </div>
                 </div>
@@ -1222,11 +1222,32 @@
                 flyingArrow.style.transform = `translateX(-50%) translateY(-${travelDistance}px) rotate(-2deg) scale(1.12)`;
 
                 playBirthdayMusic();
-                confetti({ particleCount: 55, spread: 55, startVelocity: 35, origin: { y: 0.2 } });
+
+                // Launch the party-popper burst from the actual balloon position
+                // instead of the top of the viewport.
+                const balloonRect = targetBalloons.getBoundingClientRect();
+                const burstOrigin = {
+                    x: Math.max(0.08, Math.min(0.92, (balloonRect.left + balloonRect.width / 2) / window.innerWidth)),
+                    y: Math.max(0.08, Math.min(0.88, (balloonRect.top + balloonRect.height * 0.55) / window.innerHeight))
+                };
+
+                confetti({
+                    particleCount: 55,
+                    spread: 55,
+                    startVelocity: 28,
+                    origin: burstOrigin,
+                    scalar: 0.85
+                });
 
                 setTimeout(() => {
                     popBalloons();
-                    confetti({ particleCount: 150, spread: 105, startVelocity: 42, origin: { y: 0.18 } });
+                    confetti({
+                        particleCount: 150,
+                        spread: 105,
+                        startVelocity: 38,
+                        origin: burstOrigin,
+                        scalar: 0.9
+                    });
 
                     setTimeout(() => {
                         flyingArrow.style.opacity = '0';
